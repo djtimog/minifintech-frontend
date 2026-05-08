@@ -1,4 +1,4 @@
-import { AuthState, User } from "@/lib/type";
+import { AuthState, User } from "@/lib/types";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 const initialState: AuthState = {

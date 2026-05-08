@@ -15,8 +15,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
-import { createUserSchema, CreateUserInput } from "@/lib/type";
-import AuthService, { ResponseUser } from "@/services/authService";
+import { createUserSchema, CreateUserInput, ResponseUser } from "@/lib/types";
+import AuthService from "@/services/authService";
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/store/hooks";
 import { setCredentials } from "@/store/slices/authSlice";
@@ -25,7 +25,7 @@ const signUpSchema = createUserSchema
   .extend({
     confirmPassword: z.string().min(1, "Please confirm your password"),
   })
-  .refine((data) => data.password === data.confirmPassword, {
+  .refine((data) => data.passWord === data.confirmPassword, {
     message: "Passwords do not match",
     path: ["confirmPassword"],
   });
@@ -84,26 +84,22 @@ export function SignUpForm({
               id="first_name"
               type="text"
               placeholder="John"
-              {...register("first_name")}
+              {...register("firstName")}
             />
-            {errors.first_name && (
-              <p className="text-xs text-red-500">
-                {errors.first_name.message}
-              </p>
+            {errors.firstName && (
+              <p className="text-xs text-red-500">{errors.firstName.message}</p>
             )}
           </Field>
           <Field>
-            <FieldLabel htmlFor="second_name">Last name</FieldLabel>
+            <FieldLabel htmlFor="lastName">Last name</FieldLabel>
             <Input
-              id="second_name"
+              id="lastName"
               type="text"
               placeholder="Doe"
-              {...register("second_name")}
+              {...register("lastName")}
             />
-            {errors.second_name && (
-              <p className="text-xs text-red-500">
-                {errors.second_name.message}
-              </p>
+            {errors.lastName && (
+              <p className="text-xs text-red-500">{errors.lastName.message}</p>
             )}
           </Field>
         </div>
@@ -122,10 +118,10 @@ export function SignUpForm({
         </Field>
 
         <Field>
-          <FieldLabel htmlFor="password">Password</FieldLabel>
-          <Input id="password" type="password" {...register("password")} />
-          {errors.password && (
-            <p className="text-xs text-red-500">{errors.password.message}</p>
+          <FieldLabel htmlFor="passWord">Password</FieldLabel>
+          <Input id="passWord" type="password" {...register("passWord")} />
+          {errors.passWord && (
+            <p className="text-xs text-red-500">{errors.passWord.message}</p>
           )}
         </Field>
 

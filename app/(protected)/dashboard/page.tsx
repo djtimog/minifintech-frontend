@@ -1,10 +1,14 @@
+import LogoutBtn from "@/components/LogoutBtn";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function DashboardContent() {
   return (
     <div className="flex flex-col gap-6 p-6">
       <div>
-        <h1 className="text-2xl font-bold">Good morning, John 👋</h1>
+        <div className="flex items-center justify-between flex-wrap gap-10">
+          <h1 className="text-2xl font-bold">Good morning, John 👋</h1>
+          <LogoutBtn />
+        </div>
         <p className="text-sm text-muted-foreground">
           Here&apos;s a quick overview of your account.
         </p>

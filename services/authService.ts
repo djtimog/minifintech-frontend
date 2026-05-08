@@ -1,26 +1,40 @@
-import { CreateUserInput, LoginInput } from "@/lib/type";
+import { CreateUserInput, LoginInput, ResponseUser } from "@/lib/types";
 
-export interface ResponseUser {
-  user: CreateUserInput;
-  token: string;
-}
 const createUser = ({
-  first_name,
-  second_name,
+  firstName,
+  lastName,
   email,
-  password,
+  passWord,
 }: CreateUserInput): Promise<ResponseUser> => {
   // Axios function should be called
   return Promise.resolve({
-    user: { first_name, second_name, email, password },
+    user: { 
+      id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      firstName, 
+      lastName, 
+      email, 
+      passWord,
+      emailVerificationStatus: "pending",
+      resetToken: "",
+      resetTokenExpiry: "",
+    },
     token: "Bearer ...",
   });
 };
 
-const login = ({ email, password }: LoginInput): Promise<ResponseUser> => {
-  // if (password !== "password") return null;
+const login = ({ email, passWord }: LoginInput): Promise<ResponseUser> => {
+  // if (passWord !== "password") return null;
   return Promise.resolve({
-    user: { first_name: "timi", second_name: "ogun", email, password },
+    user: { 
+      id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      firstName: "timi", 
+      lastName: "ogun", 
+      email, 
+      passWord,
+      emailVerificationStatus: "verified",
+      resetToken: "",
+      resetTokenExpiry: "",
+    },
     token: "Bearer ...",
   });
 };

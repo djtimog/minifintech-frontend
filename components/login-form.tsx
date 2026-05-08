@@ -14,8 +14,8 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { loginSchema, LoginInput } from "@/lib/type";
-import AuthService, { ResponseUser } from "@/services/authService";
+import { loginSchema, LoginInput, ResponseUser } from "@/lib/types";
+import AuthService from "@/services/authService";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAppDispatch } from "@/store/hooks";
 import { setCredentials } from "@/store/slices/authSlice";
@@ -89,9 +89,9 @@ export function LoginForm({
               Forgot your password?
             </Link>
           </div>
-          <Input id="password" type="password" {...register("password")} />
-          {errors.password && (
-            <p className="text-xs text-red-500">{errors.password.message}</p>
+          <Input id="password" type="password" {...register("passWord")} />
+          {errors.passWord && (
+            <p className="text-xs text-red-500">{errors.passWord.message}</p>
           )}
         </Field>
 
