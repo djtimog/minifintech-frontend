@@ -39,7 +39,6 @@ app/
 components/
 ├── LoginForm.tsx
 ├── SignUpForm.tsx
-├── DashboardContent.tsx
 └── AuthGuard.tsx         # Redirects unauthenticated users
 store/
 ├── index.ts              # Redux store config

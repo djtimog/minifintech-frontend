@@ -1,3 +1,5 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,13 +11,53 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+import { loginSchema, LoginInput } from "@/lib/type";
+import AuthService, { ResponseUser } from "@/services/authService";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useAppDispatch } from "@/store/hooks";
+import { setCredentials } from "@/store/slices/authSlice";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get("redirect") || "/dashboard";
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const loginMutation = useMutation({
+    mutationFn: (data: LoginInput) => AuthService.login(data),
+    onSuccess: (data: ResponseUser) => {
+      dispatch(setCredentials({ user: data.user, token: data.token }));
+      router.push(redirect);
+    },
+    onError: () => {
+      console.error("Login failed");
+    },
+  });
+
+  const onSubmit = (data: LoginInput) => {
+    loginMutation.mutate(data);
+  };
+
   return (
-    <form className={cn("flex flex-col gap-6", className)} {...props}>
+    <form
+      className={cn("flex flex-col gap-6", className)}
+      onSubmit={handleSubmit(onSubmit)}
+      {...props}
+    >
       <FieldGroup>
         <div className="flex flex-col items-center gap-1 text-center">
           <h1 className="text-2xl font-bold">Login to your account</h1>
@@ -23,10 +65,20 @@ export function LoginForm({
             Enter your email below to login to your account
           </p>
         </div>
+
         <Field>
           <FieldLabel htmlFor="email">Email</FieldLabel>
-          <Input id="email" type="email" placeholder="m@example.com" required />
+          <Input
+            id="email"
+            type="email"
+            placeholder="m@example.com"
+            {...register("email")}
+          />
+          {errors.email && (
+            <p className="text-xs text-red-500">{errors.email.message}</p>
+          )}
         </Field>
+
         <Field>
           <div className="flex items-center">
             <FieldLabel htmlFor="password">Password</FieldLabel>
@@ -37,12 +89,25 @@ export function LoginForm({
               Forgot your password?
             </Link>
           </div>
-          <Input id="password" type="password" required />
+          <Input id="password" type="password" {...register("password")} />
+          {errors.password && (
+            <p className="text-xs text-red-500">{errors.password.message}</p>
+          )}
         </Field>
+
         <Field>
-          <Button type="submit">Login</Button>
+          <Button type="submit" disabled={loginMutation.isPending}>
+            {loginMutation.isPending ? "Logging in..." : "Login"}
+          </Button>
+          {loginMutation.isError && (
+            <p className="text-xs text-red-500 text-center">
+              Invalid email or password. Please try again.
+            </p>
+          )}
         </Field>
+
         <FieldSeparator>Or continue with</FieldSeparator>
+
         <Field>
           <Button variant="outline" type="button" disabled>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">

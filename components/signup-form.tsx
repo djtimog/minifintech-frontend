@@ -1,3 +1,5 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,13 +11,64 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useMutation } from "@tanstack/react-query";
+import { createUserSchema, CreateUserInput } from "@/lib/type";
+import AuthService, { ResponseUser } from "@/services/authService";
+import { useRouter } from "next/navigation";
+import { useAppDispatch } from "@/store/hooks";
+import { setCredentials } from "@/store/slices/authSlice";
+
+const signUpSchema = createUserSchema
+  .extend({
+    confirmPassword: z.string().min(1, "Please confirm your password"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
+type SignUpInput = z.infer<typeof signUpSchema>;
 
 export function SignUpForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SignUpInput>({
+    resolver: zodResolver(signUpSchema),
+  });
+
+  const signUpMutation = useMutation({
+    mutationFn: (data: CreateUserInput) => AuthService.createUser(data),
+    onSuccess: (data: ResponseUser) => {
+      dispatch(setCredentials({ user: data.user, token: data.token }));
+      router.push("/dashboard");
+    },
+    onError: () => {
+      console.error("Sign up failed");
+    },
+  });
+
+  const onSubmit = (data: SignUpInput) => {
+    const { confirmPassword, ...payload } = data;
+    signUpMutation.mutate(payload);
+  };
+
   return (
-    <form className={cn("flex flex-col gap-6", className)} {...props}>
+    <form
+      className={cn("flex flex-col gap-6", className)}
+      onSubmit={handleSubmit(onSubmit)}
+      {...props}
+    >
       <FieldGroup>
         <div className="flex flex-col items-center gap-1 text-center">
           <h1 className="text-2xl font-bold">Create an account</h1>
@@ -26,32 +79,81 @@ export function SignUpForm({
 
         <div className="grid grid-cols-2 gap-4">
           <Field>
-            <FieldLabel htmlFor="firstName">First name</FieldLabel>
-            <Input id="firstName" type="text" placeholder="John" required />
+            <FieldLabel htmlFor="first_name">First name</FieldLabel>
+            <Input
+              id="first_name"
+              type="text"
+              placeholder="John"
+              {...register("first_name")}
+            />
+            {errors.first_name && (
+              <p className="text-xs text-red-500">
+                {errors.first_name.message}
+              </p>
+            )}
           </Field>
           <Field>
-            <FieldLabel htmlFor="lastName">Last name</FieldLabel>
-            <Input id="lastName" type="text" placeholder="Doe" required />
+            <FieldLabel htmlFor="second_name">Last name</FieldLabel>
+            <Input
+              id="second_name"
+              type="text"
+              placeholder="Doe"
+              {...register("second_name")}
+            />
+            {errors.second_name && (
+              <p className="text-xs text-red-500">
+                {errors.second_name.message}
+              </p>
+            )}
           </Field>
         </div>
 
         <Field>
           <FieldLabel htmlFor="email">Email</FieldLabel>
-          <Input id="email" type="email" placeholder="m@example.com" required />
+          <Input
+            id="email"
+            type="email"
+            placeholder="m@example.com"
+            {...register("email")}
+          />
+          {errors.email && (
+            <p className="text-xs text-red-500">{errors.email.message}</p>
+          )}
         </Field>
 
         <Field>
           <FieldLabel htmlFor="password">Password</FieldLabel>
-          <Input id="password" type="password" required />
+          <Input id="password" type="password" {...register("password")} />
+          {errors.password && (
+            <p className="text-xs text-red-500">{errors.password.message}</p>
+          )}
         </Field>
 
         <Field>
           <FieldLabel htmlFor="confirmPassword">Confirm password</FieldLabel>
-          <Input id="confirmPassword" type="password" required />
+          <Input
+            id="confirmPassword"
+            type="password"
+            {...register("confirmPassword")}
+          />
+          {errors.confirmPassword && (
+            <p className="text-xs text-red-500">
+              {errors.confirmPassword.message}
+            </p>
+          )}
         </Field>
 
         <Field>
-          <Button type="submit">Create account</Button>
+          <Button type="submit" disabled={signUpMutation.isPending}>
+            {signUpMutation.isPending
+              ? "Creating account..."
+              : "Create account"}
+          </Button>
+          {signUpMutation.isError && (
+            <p className="text-xs text-red-500 text-center">
+              Something went wrong. Please try again.
+            </p>
+          )}
         </Field>
 
         <FieldSeparator>Or continue with</FieldSeparator>
