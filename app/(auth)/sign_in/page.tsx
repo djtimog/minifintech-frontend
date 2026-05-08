@@ -5,6 +5,7 @@ import { ModeToggle } from "@/components/ModeToggle";
 import { GalleryVerticalEndIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { Suspense } from "react";
 
 export default function LoginPage() {
   return (
@@ -23,7 +24,9 @@ export default function LoginPage() {
         </header>
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-xs">
-            <LoginForm />
+            <Suspense fallback={<div>Loading...</div>}>
+              <LoginForm />
+            </Suspense>
           </div>
         </div>
       </div>
