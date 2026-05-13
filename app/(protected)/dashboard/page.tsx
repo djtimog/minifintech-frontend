@@ -1,4 +1,5 @@
 import LogoutBtn from "@/components/LogoutBtn";
+import { TransferDialog } from "@/components/MakeTransfer";
 import { ModeToggle } from "@/components/ModeToggle";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -10,6 +11,7 @@ export default function DashboardContent() {
           <h1 className="text-2xl font-bold">Good morning, John 👋</h1>
           <div className="flex items-center gap-4">
             <ModeToggle />
+            <TransferDialog />
             <LogoutBtn />
           </div>
         </div>
