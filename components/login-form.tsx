@@ -14,11 +14,12 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { loginSchema, LoginInput, ResponseUser } from "@/lib/types";
+import { loginSchema, LoginInput, User, LoginResponse } from "@/lib/types";
 import AuthService from "@/services/authService";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAppDispatch } from "@/store/hooks";
-import { setCredentials } from "@/store/slices/authSlice";
+import { setToken, setUser } from "@/store/slices/authSlice";
+import { jwtDecode } from "jwt-decode";
 
 export function LoginForm({
   className,
@@ -39,8 +40,27 @@ export function LoginForm({
 
   const loginMutation = useMutation({
     mutationFn: (data: LoginInput) => AuthService.login(data),
-    onSuccess: (data: ResponseUser) => {
-      dispatch(setCredentials({ user: data.user, token: data.token }));
+    onSuccess: (data: LoginResponse) => {
+      dispatch(setToken(data.token));
+
+      try {
+        const decoded = jwtDecode<Record<string, string>>(data.token);
+        console.log("JWT payload:", decoded);
+
+        const user: User = {
+          id: decoded.sub ?? "",
+          email: decoded.email ?? "",
+          firstName: decoded.firstName ?? "",
+          lastName: decoded.lastName ?? "",
+          emailVerificationStatus: "Unverified",
+          walletId: decoded.walletId,
+        };
+
+        dispatch(setUser(user));
+      } catch (e) {
+        console.error("Failed to decode JWT:", e);
+      }
+
       router.push(redirect);
     },
     onError: () => {
